@@ -3,6 +3,9 @@
 <head>
     <title>Result</title>
 
+    <!-- 📱 Mobile Responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -77,7 +80,54 @@
             padding: 8px 15px;
             cursor: pointer;
             margin-bottom: 10px;
+            border: none;
+            border-radius: 8px;
         }
+
+        /* 📱 MOBILE RESPONSIVE DESIGN */
+        @media screen and (max-width: 768px) {
+
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .card {
+                padding: 15px;
+                margin: 10px 0;
+            }
+
+            .risk {
+                font-size: 20px;
+            }
+
+            .chart-container {
+                width: 220px;
+                height: 220px;
+            }
+
+            button {
+                width: 100%;
+                font-size: 16px;
+                padding: 12px;
+            }
+
+            ul {
+                padding-left: 20px;
+            }
+
+            p, li {
+                font-size: 15px;
+            }
+        }
+
     </style>
 </head>
 

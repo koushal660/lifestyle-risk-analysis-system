@@ -1,9 +1,12 @@
 from flask import send_file
 from reportlab.pdfgen import canvas
 import io
+import os
+
 from flask import Flask, request, render_template, redirect
 import joblib
 import pandas as pd
+
 from src.risk_engine import (
     get_age_group,
     calculate_score,
@@ -31,6 +34,7 @@ def home():
 # -------------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
+
     if request.method == "POST":
 
         email = request.form["email"]
@@ -212,4 +216,11 @@ def download_report():
 # RUN APP
 # -------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    port = int(os.environ.get("PORT", 5000))
+
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=False
+    )
