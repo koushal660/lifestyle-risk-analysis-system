@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lifestyle Risk Predictor</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            background: white;
+            width: 700px;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .full {
+            grid-column: span 2;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4facfe;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #007bff;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Lifestyle Risk Analysis</h2>
+
+<form action="/predict" method="post">
+
+<div class="grid">
+
+    <div>
+        <label>Age</label>
+        <input type="number" name="age" required>
+    </div>
+
+    <div>
+        <label>Gender</label>
+        <select name="gender">
+            <option>Male</option>
+            <option>Female</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Sleep Hours</label>
+        <input type="number" step="0.1" name="sleep_hours">
+    </div>
+
+    <div>
+        <label>Sleep Quality (1-10)</label>
+        <input type="number" name="sleep_quality">
+    </div>
+
+    <div>
+        <label>Screen Time</label>
+        <input type="number" step="0.1" name="screen_time">
+    </div>
+
+    <div>
+        <label>Exercise Hours</label>
+        <input type="number" step="0.1" name="exercise_hours">
+    </div>
+
+    <div>
+        <label>Work Hours</label>
+        <input type="number" step="0.1" name="work_hours">
+    </div>
+
+    <div>
+        <label>BMI</label>
+        <input type="number" step="0.1" name="bmi">
+    </div>
+
+    <div>
+        <label>Diet Quality (1-10)</label>
+        <input type="number" name="diet_quality">
+    </div>
+
+    <div>
+        <label>Fast Food Frequency</label>
+        <input type="number" name="fast_food_frequency">
+    </div>
+
+    <div>
+        <label>Water Intake</label>
+        <input type="number" step="0.1" name="water_intake">
+    </div>
+
+    <div>
+        <label>Stress Level (1-10)</label>
+        <input type="number" name="stress_level">
+    </div>
+
+    <div>
+        <label>Mental Health Score</label>
+        <input type="number" name="mental_health_score">
+    </div>
+
+    <div>
+        <label>Smoking</label>
+        <select name="smoking">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Alcohol</label>
+        <select name="alcohol">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+    </div>
+
+    <div class="full">
+        <label>Physical Activity Level</label>
+        <select name="physical_activity_level">
+            <option>Low</option>
+            <option>Moderate</option>
+            <option>High</option>
+        </select>
+    </div>
+
+    <div class="full">
+        <button type="submit">Predict Risk</button>
+    </div>
+
+</div>
+
+</form>
+
+</div>
+
+</body>
+</html>

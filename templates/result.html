@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Result</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f7fa;
+            transition: 0.3s;
+        }
+
+        .dark {
+            background: #121212;
+            color: white;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .dark .card {
+            background: #1e1e1e;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .risk {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .high { color: red; }
+        .medium { color: orange; }
+        .low { color: green; }
+
+        .progress {
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 20px;
+            transition: width 0.5s ease;
+        }
+
+        /* progress colors */
+        .progress-bar.low { background: red; }
+        .progress-bar.medium { background: orange; }
+        .progress-bar.high { background: green; }
+
+        /* chart size */
+        .chart-container {
+            width: 300px;
+            height: 300px;
+            margin: auto;
+        }
+
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<button onclick="toggleDark()">🌙 Toggle Dark Mode</button>
+
+<div class="container">
+
+<h1>📊 Lifestyle Risk Dashboard</h1>
+
+<div class="card">
+    <h3>Summary</h3>
+
+    <p class="risk 
+    {% if risk == 'High' %}high
+    {% elif risk == 'Medium' %}medium
+    {% else %}low
+    {% endif %}">
+    Risk Level: {{ risk }}
+    </p>
+
+    <p>Score: {{ score }}/100</p>
+
+    <!-- Progress Bar -->
+    <div class="progress">
+
+        <div class="progress-bar
+        {% if score < 40 %}low
+        {% elif score < 70 %}medium
+        {% else %}high
+        {% endif %}"
+        id="score-bar">
+        </div>
+
+    </div>
+</div>
+
+<!-- PIE CHART -->
+<div class="card">
+    <h3>📊 Risk Contribution</h3>
+
+    <div class="chart-container">
+        <canvas id="chart"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <h3>⚠️ Key Risk Factors</h3>
+
+    <ul>
+        {% for f in factors %}
+        <li>⚡ {{ f.name }} → {{ f.impact }}</li>
+        {% endfor %}
+    </ul>
+
+</div>
+
+<div class="card">
+    <h3>✅ Recommendations</h3>
+
+    <ul>
+        {% for r in recommendations %}
+        <li>✔ {{ r }}</li>
+        {% endfor %}
+    </ul>
+
+</div>
+
+<div class="card">
+    <h3>🧠 Future Insight</h3>
+    <p>{{ future }}</p>
+</div>
+
+<div class="card" style="text-align:center;">
+
+    <a href="/download-report">
+
+        <button>
+            📄 Download PDF Report
+        </button>
+
+    </a>
+
+</div>
+
+</div>
+
+<!-- DATA FROM FLASK -->
+<script id="dist-data" type="application/json">
+{{ distribution | tojson }}
+</script>
+
+<!-- MAIN SCRIPT -->
+<script>
+
+function toggleDark() {
+    document.body.classList.toggle("dark");
+}
+
+// progress bar width
+document.getElementById("score-bar").style.width = "{{ score }}%";
+
+// get distribution data safely
+const distribution = JSON.parse(
+    document.getElementById("dist-data").textContent
+);
+
+// handle empty chart case
+if (Object.keys(distribution).length === 0) {
+
+    document.getElementById("chart").outerHTML =
+        "<p>No risk factors 🎉</p>";
+
+} else {
+
+    const chartData = {
+
+        labels: Object.keys(distribution),
+
+        datasets: [{
+            data: Object.values(distribution),
+
+            backgroundColor: [
+                "#ff6384",
+                "#36a2eb",
+                "#ffce56",
+                "#4caf50",
+                "#9966ff"
+            ]
+        }]
+    };
+
+    new Chart(document.getElementById("chart"), {
+
+        type: "pie",
+        data: chartData,
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+</script>
+
+</body>
+</html>
