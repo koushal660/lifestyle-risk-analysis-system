@@ -6,9 +6,12 @@ import os
 from datetime import datetime
 from db import predictions_collection
 
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, redirect, jsonify
 import joblib
 import pandas as pd
+
+from openai import OpenAI
+from dotenv import load_dotenv
 
 from src.risk_engine import (
     get_age_group,
@@ -19,8 +22,18 @@ from src.risk_engine import (
     get_distribution
 )
 
+# LOAD ENV VARIABLES
+load_dotenv()
+
 app = Flask(__name__)
 
+# LOAD MODEL ONLY ONCE
+model = joblib.load("models/model.pkl")
+
+# OPENAI CLIENT
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
 
 # -------------------------
 # 1. HOME PAGE
@@ -41,7 +54,6 @@ def login():
         email = request.form["email"]
         password = request.form["password"]
 
-        # simple fixed password
         if password == "1234":
             return redirect("/predict-form")
 
@@ -64,8 +76,6 @@ def predict_form():
 # -------------------------
 @app.route("/predict", methods=["POST"])
 def predict():
-
-    model = joblib.load("models/model.pkl")
 
     data = request.form.to_dict()
 
@@ -103,9 +113,7 @@ def predict():
 
     distribution = get_distribution(factors)
 
-    # -------------------------
     # SAVE TO MONGODB
-    # -------------------------
     prediction_data = {
 
         "age": data["age"],
@@ -136,9 +144,7 @@ def predict():
 
     predictions_collection.insert_one(prediction_data)
 
-    # -------------------------
     # STORE LATEST RESULT
-    # -------------------------
     global latest_result
 
     latest_result = {
@@ -262,6 +268,74 @@ def history():
         "history.html",
         predictions=all_predictions
     )
+
+
+# -------------------------
+# 7. AI CHATBOT
+# -------------------------
+@app.route("/chat", methods=["POST"])
+def chat():
+
+    try:
+
+        user_message = request.json.get("message")
+
+        context = f"""
+        User Lifestyle Analysis:
+
+        Risk Level: {latest_result['risk']}
+        Lifestyle Score: {latest_result['score']}
+
+        Risk Factors:
+        {latest_result['factors']}
+
+        Recommendations:
+        {latest_result['recommendations']}
+
+        Future Insight:
+        {latest_result['future']}
+        """
+
+        response = client.chat.completions.create(
+
+            model="gpt-4.1-mini",
+
+            messages=[
+
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an AI lifestyle health assistant. "
+                        "Give short, practical, friendly, and personalized "
+                        "health suggestions based on the user's analysis."
+                    )
+                },
+
+                {
+                    "role": "system",
+                    "content": context
+                },
+
+                {
+                    "role": "user",
+                    "content": user_message
+                }
+            ],
+
+            max_tokens=200
+        )
+
+        ai_reply = response.choices[0].message.content
+
+        return jsonify({
+            "reply": ai_reply
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "reply": f"Error: {str(e)}"
+        })
 
 
 # -------------------------
