@@ -249,6 +249,22 @@ def download_report():
 
 
 # -------------------------
+# 6. HISTORY PAGE
+# -------------------------
+@app.route("/history")
+def history():
+
+    all_predictions = list(
+        predictions_collection.find().sort("timestamp", -1)
+    )
+
+    return render_template(
+        "history.html",
+        predictions=all_predictions
+    )
+
+
+# -------------------------
 # RUN APP
 # -------------------------
 if __name__ == "__main__":
