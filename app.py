@@ -3,6 +3,9 @@ from reportlab.pdfgen import canvas
 import io
 import os
 
+from datetime import datetime
+from db import predictions_collection
+
 from flask import Flask, request, render_template, redirect
 import joblib
 import pandas as pd
@@ -99,6 +102,39 @@ def predict():
     factors_dict = [{"name": f, "impact": i} for f, i in factors]
 
     distribution = get_distribution(factors)
+
+    # -------------------------
+    # SAVE TO MONGODB
+    # -------------------------
+    prediction_data = {
+
+        "age": data["age"],
+        "gender": data["gender"],
+        "sleep_hours": data["sleep_hours"],
+        "sleep_quality": data["sleep_quality"],
+        "screen_time": data["screen_time"],
+        "exercise_hours": data["exercise_hours"],
+        "work_hours": data["work_hours"],
+        "bmi": data["bmi"],
+        "diet_quality": data["diet_quality"],
+        "fast_food_frequency": data["fast_food_frequency"],
+        "water_intake": data["water_intake"],
+        "stress_level": data["stress_level"],
+        "mental_health_score": data["mental_health_score"],
+        "smoking": data["smoking"],
+        "alcohol": data["alcohol"],
+
+        "risk": risk,
+        "score": score,
+
+        "future_insight": future,
+
+        "recommendations": recommendations,
+
+        "timestamp": datetime.now()
+    }
+
+    predictions_collection.insert_one(prediction_data)
 
     # -------------------------
     # STORE LATEST RESULT
