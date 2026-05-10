@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Prediction History</title>
+
+    <style>
+
+        body{
+            background:#111;
+            color:white;
+            font-family:Arial;
+            padding:40px;
+        }
+
+        h1{
+            text-align:center;
+            margin-bottom:40px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            background:#1e1e1e;
+        }
+
+        th, td{
+            padding:15px;
+            border:1px solid #333;
+            text-align:center;
+        }
+
+        th{
+            background:#333;
+        }
+
+        tr:hover{
+            background:#2a2a2a;
+        }
+
+        .high{
+            color:red;
+            font-weight:bold;
+        }
+
+        .medium{
+            color:orange;
+            font-weight:bold;
+        }
+
+        .low{
+            color:lightgreen;
+            font-weight:bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>📜 Prediction History</h1>
+
+    <table>
+
+        <tr>
+            <th>Age</th>
+            <th>Gender</th>
+            <th>Risk</th>
+            <th>Score</th>
+            <th>Timestamp</th>
+        </tr>
+
+        {% for p in predictions %}
+
+        <tr>
+
+            <td>{{ p.age }}</td>
+
+            <td>{{ p.gender }}</td>
+
+            <td class="
+                {% if p.risk == 'High' %}
+                    high
+                {% elif p.risk == 'Medium' %}
+                    medium
+                {% else %}
+                    low
+                {% endif %}
+            ">
+
+                {{ p.risk }}
+
+            </td>
+
+            <td>{{ p.score }}</td>
+
+            <td>{{ p.timestamp }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</body>
+
+</html>
