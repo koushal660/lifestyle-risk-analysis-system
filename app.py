@@ -21,8 +21,6 @@ from src.risk_engine import (
 
 app = Flask(__name__)
 
-model = joblib.load("models/model.pkl")
-
 
 # -------------------------
 # 1. HOME PAGE
@@ -66,6 +64,8 @@ def predict_form():
 # -------------------------
 @app.route("/predict", methods=["POST"])
 def predict():
+
+    model = joblib.load("models/model.pkl")
 
     data = request.form.to_dict()
 
