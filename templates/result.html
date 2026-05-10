@@ -64,12 +64,10 @@
             transition: width 0.5s ease;
         }
 
-        /* progress colors */
         .progress-bar.low { background: red; }
         .progress-bar.medium { background: orange; }
         .progress-bar.high { background: green; }
 
-        /* chart size */
         .chart-container {
             width: 300px;
             height: 300px;
@@ -84,7 +82,68 @@
             border-radius: 8px;
         }
 
-        /* 📱 MOBILE RESPONSIVE DESIGN */
+        /* CHATBOT */
+
+        .chat-box {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            background: #fafafa;
+        }
+
+        .dark .chat-box {
+            background: #2a2a2a;
+        }
+
+        .user-message {
+            text-align: right;
+            margin: 10px 0;
+        }
+
+        .ai-message {
+            text-align: left;
+            margin: 10px 0;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+
+        .user-message .message-bubble {
+            background: #4facfe;
+            color: white;
+        }
+
+        .ai-message .message-bubble {
+            background: #e5e5ea;
+            color: black;
+        }
+
+        .dark .ai-message .message-bubble {
+            background: #444;
+            color: white;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-container input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        /* MOBILE */
+
         @media screen and (max-width: 768px) {
 
             body {
@@ -126,6 +185,10 @@
             p, li {
                 font-size: 15px;
             }
+
+            .chat-input-container {
+                flex-direction: column;
+            }
         }
 
     </style>
@@ -152,7 +215,6 @@
 
     <p>Score: {{ score }}/100</p>
 
-    <!-- Progress Bar -->
     <div class="progress">
 
         <div class="progress-bar
@@ -166,7 +228,6 @@
     </div>
 </div>
 
-<!-- PIE CHART -->
 <div class="card">
     <h3>📊 Risk Contribution</h3>
 
@@ -202,6 +263,37 @@
     <p>{{ future }}</p>
 </div>
 
+<!-- AI CHATBOT -->
+<div class="card">
+
+    <h3>🤖 AI Health Assistant</h3>
+
+    <div id="chat-box" class="chat-box">
+
+        <div class="ai-message">
+            <div class="message-bubble">
+                Hello 👋 Ask me anything about your lifestyle risk and health improvements.
+            </div>
+        </div>
+
+    </div>
+
+    <div class="chat-input-container">
+
+        <input
+            type="text"
+            id="user-input"
+            placeholder="Ask something..."
+        >
+
+        <button onclick="sendMessage()">
+            Send
+        </button>
+
+    </div>
+
+</div>
+
 <div class="card" style="text-align:center;">
 
     <a href="/download-report">
@@ -228,15 +320,12 @@ function toggleDark() {
     document.body.classList.toggle("dark");
 }
 
-// progress bar width
 document.getElementById("score-bar").style.width = "{{ score }}%";
 
-// get distribution data safely
 const distribution = JSON.parse(
     document.getElementById("dist-data").textContent
 );
 
-// handle empty chart case
 if (Object.keys(distribution).length === 0) {
 
     document.getElementById("chart").outerHTML =
@@ -271,6 +360,85 @@ if (Object.keys(distribution).length === 0) {
             maintainAspectRatio: false
         }
     });
+}
+
+
+async function sendMessage() {
+
+    const input = document.getElementById("user-input");
+
+    const message = input.value.trim();
+
+    if (message === "") return;
+
+    const chatBox = document.getElementById("chat-box");
+
+    // USER MESSAGE
+    chatBox.innerHTML += `
+        <div class="user-message">
+            <div class="message-bubble">
+                ${message}
+            </div>
+        </div>
+    `;
+
+    input.value = "";
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // LOADING
+    chatBox.innerHTML += `
+        <div class="ai-message" id="loading">
+            <div class="message-bubble">
+                Thinking...
+            </div>
+        </div>
+    `;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+
+        const response = await fetch("/chat", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                message: message
+            })
+        });
+
+        const data = await response.json();
+
+        document.getElementById("loading").remove();
+
+        // AI RESPONSE
+        chatBox.innerHTML += `
+            <div class="ai-message">
+                <div class="message-bubble">
+                    ${data.reply}
+                </div>
+            </div>
+        `;
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+    } catch (error) {
+
+        document.getElementById("loading").remove();
+
+        chatBox.innerHTML += `
+            <div class="ai-message">
+                <div class="message-bubble">
+                    Error connecting to AI.
+                </div>
+            </div>
+        `;
+    }
 }
 
 </script>
