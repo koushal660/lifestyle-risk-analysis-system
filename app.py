@@ -10,9 +10,6 @@ from flask import Flask, request, render_template, redirect, jsonify
 import joblib
 import pandas as pd
 
-from openai import OpenAI
-from dotenv import load_dotenv
-
 from src.risk_engine import (
     get_age_group,
     calculate_score,
@@ -22,18 +19,11 @@ from src.risk_engine import (
     get_distribution
 )
 
-# LOAD ENV VARIABLES
-load_dotenv()
-
 app = Flask(__name__)
 
 # LOAD MODEL ONLY ONCE
 model = joblib.load("models/model.pkl")
 
-# OPENAI CLIENT
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
-)
 
 # -------------------------
 # 1. HOME PAGE
@@ -276,66 +266,173 @@ def history():
 @app.route("/chat", methods=["POST"])
 def chat():
 
-    try:
+    user_message = request.json.get("message").lower()
 
-        user_message = request.json.get("message")
+    risk = latest_result["risk"]
+    score = latest_result["score"]
 
-        context = f"""
-        User Lifestyle Analysis:
+    factors = [
+        factor["name"]
+        for factor in latest_result["factors"]
+    ]
 
-        Risk Level: {latest_result['risk']}
-        Lifestyle Score: {latest_result['score']}
+    recommendations = latest_result["recommendations"]
 
-        Risk Factors:
-        {latest_result['factors']}
+    reply = ""
 
-        Recommendations:
-        {latest_result['recommendations']}
+    # RISK ANALYSIS
+    if "risk" in user_message:
 
-        Future Insight:
-        {latest_result['future']}
-        """
+        if risk == "High":
 
-        response = client.chat.completions.create(
+            reply = (
+                f"Your risk level is HIGH mainly because of "
+                f"{', '.join(factors)}. "
+                f"Improving sleep, stress management, diet, "
+                f"and physical activity can significantly "
+                f"reduce future health risks."
+            )
 
-            model="gpt-4.1-mini",
+        elif risk == "Medium":
 
-            messages=[
+            reply = (
+                f"Your lifestyle risk is MODERATE. "
+                f"You are doing well in some areas, but "
+                f"{', '.join(factors)} need improvement "
+                f"to prevent future health issues."
+            )
 
-                {
-                    "role": "system",
-                    "content": (
-                        "You are an AI lifestyle health assistant. "
-                        "Give short, practical, friendly, and personalized "
-                        "health suggestions based on the user's analysis."
-                    )
-                },
+        else:
 
-                {
-                    "role": "system",
-                    "content": context
-                },
+            reply = (
+                "Your current lifestyle risk is LOW. "
+                "Maintaining healthy habits consistently "
+                "can help you stay healthy long-term."
+            )
 
-                {
-                    "role": "user",
-                    "content": user_message
-                }
-            ],
+    # SLEEP
+    elif "sleep" in user_message:
 
-            max_tokens=200
+        reply = (
+            "To improve sleep quality:\n"
+            "- Sleep 7-8 hours daily\n"
+            "- Reduce screen time before bed\n"
+            "- Maintain a fixed sleep schedule\n"
+            "- Avoid caffeine late at night"
         )
 
-        ai_reply = response.choices[0].message.content
+    # STRESS
+    elif "stress" in user_message:
 
-        return jsonify({
-            "reply": ai_reply
-        })
+        reply = (
+            "To reduce stress:\n"
+            "- Practice meditation or deep breathing\n"
+            "- Exercise regularly\n"
+            "- Take proper breaks during work\n"
+            "- Maintain healthy sleep habits"
+        )
 
-    except Exception as e:
+    # EXERCISE
+    elif (
+        "exercise" in user_message or
+        "workout" in user_message or
+        "fitness" in user_message
+    ):
 
-        return jsonify({
-            "reply": f"Error: {str(e)}"
-        })
+        reply = (
+            "Recommended activities:\n"
+            "- Walking or jogging\n"
+            "- Cycling\n"
+            "- Home workouts\n"
+            "- Yoga or stretching\n\n"
+            "Aim for at least 30 minutes daily."
+        )
+
+    # DIET
+    elif (
+        "diet" in user_message or
+        "food" in user_message or
+        "nutrition" in user_message
+    ):
+
+        reply = (
+            "To improve diet quality:\n"
+            "- Reduce junk food intake\n"
+            "- Eat more fruits and vegetables\n"
+            "- Drink enough water\n"
+            "- Increase protein and fiber intake"
+        )
+
+    # SMOKING
+    elif "smoking" in user_message:
+
+        reply = (
+            "Smoking can significantly increase future "
+            "health risks. Reducing or quitting smoking "
+            "can improve lung health, heart health, and "
+            "overall lifestyle score."
+        )
+
+    # BMI / WEIGHT
+    elif (
+        "bmi" in user_message or
+        "weight" in user_message
+    ):
+
+        reply = (
+            "Maintaining a healthy BMI requires:\n"
+            "- Balanced diet\n"
+            "- Regular exercise\n"
+            "- Good sleep\n"
+            "- Consistent healthy habits"
+        )
+
+    # RECOMMENDATIONS
+    elif (
+        "recommendation" in user_message or
+        "improve" in user_message or
+        "suggestion" in user_message
+    ):
+
+        reply = (
+            "Based on your lifestyle analysis, "
+            "these improvements are recommended:\n\n"
+            + "\n".join(
+                [f"- {r}" for r in recommendations]
+            )
+        )
+
+    # GREETINGS
+    elif (
+        "hello" in user_message or
+        "hi" in user_message or
+        "hey" in user_message
+    ):
+
+        reply = (
+            "Hello 👋 I'm your Lifestyle Health Assistant. "
+            "You can ask me about sleep, stress, diet, "
+            "exercise, BMI, or your risk analysis."
+        )
+
+    # DEFAULT RESPONSE
+    else:
+
+        reply = (
+            "I can help you understand your lifestyle "
+            "analysis and health improvements.\n\n"
+            "Try asking about:\n"
+            "- sleep\n"
+            "- stress\n"
+            "- exercise\n"
+            "- diet\n"
+            "- BMI\n"
+            "- risk level"
+        )
+
+    return jsonify({
+        "reply": reply
+    })
 
 
 # -------------------------
