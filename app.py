@@ -132,7 +132,10 @@ def predict():
         "timestamp": datetime.now()
     }
 
-    predictions_collection.insert_one(prediction_data)
+    try:
+        predictions_collection.insert_one(prediction_data)
+    except Exception as e:
+      print("MongoDB Error:", e)
 
     # STORE LATEST RESULT
     global latest_result
