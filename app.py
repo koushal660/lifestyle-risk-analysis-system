@@ -565,12 +565,45 @@ def chat():
     # -------------------------
     elif intent == "recommendation":
 
-        reply = (
-            "Based on your lifestyle analysis:\n\n"
-            + "\n".join(
-                [f"- {r}" for r in recommendations]
+        if age_group == "15-25":
+
+            reply = (
+                "Your current lifestyle pattern suggests that stress, "
+                "screen exposure, and inconsistent recovery habits may "
+                "be affecting both mental wellness and productivity. "
+                "Improving sleep consistency, reducing prolonged screen time, "
+                "maintaining healthier daily routines, and engaging in "
+                "physical activity may significantly improve overall wellness."
             )
-        )
+
+        elif age_group == "26-35":
+
+            reply = (
+                "Your lifestyle analysis indicates signs of work-life imbalance "
+                "and elevated stress exposure. Long work routines combined with "
+                "reduced physical activity and insufficient recovery may gradually "
+                "affect long-term wellness. Improving stress management, sleep quality, "
+                "daily movement, and nutritional balance may help stabilize overall health."
+            )
+
+        elif age_group == "36-50":
+
+            reply = (
+                "Your current lifestyle indicators suggest that metabolic health, "
+                "physical activity, and long-term wellness require greater attention. "
+                "Maintaining healthier nutrition, consistent exercise, stress control, "
+                "and weight balance may significantly reduce future lifestyle-related risks."
+            )
+
+        else:
+
+            reply = (
+                "Your lifestyle analysis suggests that cardiovascular wellness, "
+                "mobility, hydration, and stress management should become higher priorities. "
+                "Maintaining regular movement, healthy nutrition, proper hydration, "
+                "and consistent recovery habits may improve long-term health stability "
+                "and overall quality of life."
+            )
 
     # -------------------------
     # GREETING
