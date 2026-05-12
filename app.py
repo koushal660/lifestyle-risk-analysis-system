@@ -34,7 +34,10 @@ INTENTS = {
         "risk",
         "danger",
         "future risk",
-        "health risk"
+        "health risk",
+        "how dangerous",
+        "serious",
+        "severity"
     ],
 
     "sleep": [
@@ -42,7 +45,9 @@ INTENTS = {
         "insomnia",
         "fatigue",
         "tired",
-        "sleeping"
+        "sleeping",
+        "barely sleep",
+        "sleep issue"
     ],
 
     "stress": [
@@ -50,7 +55,8 @@ INTENTS = {
         "burnout",
         "pressure",
         "anxiety",
-        "tension"
+        "tension",
+        "overwhelmed"
     ],
 
     "exercise": [
@@ -58,7 +64,9 @@ INTENTS = {
         "workout",
         "fitness",
         "gym",
-        "physical activity"
+        "physical activity",
+        "walking",
+        "running"
     ],
 
     "diet": [
@@ -66,35 +74,50 @@ INTENTS = {
         "food",
         "nutrition",
         "eating",
-        "junk food"
+        "junk food",
+        "meal"
     ],
 
     "smoking": [
         "smoking",
         "cigarette",
-        "tobacco"
+        "tobacco",
+        "nicotine"
     ],
 
     "bmi": [
         "bmi",
         "weight",
         "obesity",
-        "fat"
+        "fat",
+        "overweight"
     ],
 
     "recommendation": [
         "recommendation",
         "improve",
+        "improvement",
         "suggestion",
         "advice",
-        "help"
-        "reduce"
+        "help",
+        "reduce",
+        "better",
+        "healthier",
+        "tips",
+        "what should i do",
+        "how can i improve",
+        "how to improve",
+        "get better",
+        "improve my lifestyle",
+        "improve health",
+        "reduce risk"
     ],
 
     "greeting": [
         "hello",
         "hi",
-        "hey"
+        "hey",
+        "hola!!!"
     ]
 }
 
@@ -110,7 +133,7 @@ def detect_intent(message):
 
         for word in keywords:
 
-            if word in message:
+            if word.lower() in message:
                 return intent
 
     return "unknown"
@@ -359,6 +382,7 @@ def history():
 # -------------------------
 # 7. AI CHATBOT
 # -------------------------
+
 @app.route("/chat", methods=["POST"])
 def chat():
 
@@ -428,11 +452,22 @@ def chat():
                     "healthy daily habits becomes increasingly important."
                 )
 
+        elif risk == "Medium":
+
+            reply = (
+                f"Your current lifestyle risk is MODERATE mainly due to "
+                f"{', '.join(factors)}. "
+                "Lifestyle improvements in sleep, stress management, "
+                "physical activity, and nutrition can significantly "
+                "improve long-term wellness."
+            )
+
         else:
 
             reply = (
-                "Your current lifestyle risk appears manageable, "
-                "but maintaining healthy habits consistently is important."
+                "Your current lifestyle risk is relatively LOW. "
+                "Maintaining healthy daily habits consistently can help "
+                "support long-term physical and mental wellness."
             )
 
     # -------------------------
@@ -505,13 +540,25 @@ def chat():
     # -------------------------
     elif intent == "bmi":
 
-        reply = (
-            "Maintaining healthy BMI requires:\n"
-            "- Balanced diet\n"
-            "- Regular physical activity\n"
-            "- Good sleep\n"
-            "- Consistent healthy habits"
-        )
+        if (
+            "Metabolic Health Risk" in factors or
+            "Cardiovascular Health Concern" in factors
+        ):
+
+            reply = (
+                "Your current lifestyle analysis suggests that BMI "
+                "may be contributing to future health risks. "
+                "Maintaining healthy nutrition, exercise, sleep, "
+                "and weight balance can significantly improve wellness."
+            )
+
+        else:
+
+            reply = (
+                "Your BMI-related lifestyle indicators currently appear "
+                "reasonably stable. Maintaining consistent healthy habits "
+                "is important for long-term wellness."
+            )
 
     # -------------------------
     # RECOMMENDATIONS
@@ -546,21 +593,20 @@ def chat():
     else:
 
         reply = (
-            "I can help you understand your lifestyle analysis.\n\n"
-            "Try asking about:\n"
-            "- risk\n"
-            "- sleep\n"
-            "- stress\n"
-            "- exercise\n"
-            "- diet\n"
-            "- BMI\n"
-            "- recommendations"
+            "I'm here to help you understand your lifestyle analysis 😊\n\n"
+            "You can ask me about:\n"
+            "- health risk\n"
+            "- sleep quality\n"
+            "- stress & burnout\n"
+            "- exercise & fitness\n"
+            "- diet & nutrition\n"
+            "- BMI & weight\n"
+            "- lifestyle improvements"
         )
 
     return jsonify({
         "reply": reply
     })
-
 
 # -------------------------
 # RUN APP
