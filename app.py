@@ -135,7 +135,7 @@ def predict():
     try:
         predictions_collection.insert_one(prediction_data)
     except Exception as e:
-      print("MongoDB Error:", e)
+        print("MongoDB Error:", e)
 
     # STORE LATEST RESULT
     global latest_result
@@ -268,6 +268,14 @@ def history():
 # -------------------------
 @app.route("/chat", methods=["POST"])
 def chat():
+    global latest_result
+
+    if "latest_result" not in globals():
+
+      return jsonify({
+        "reply":
+        "Please generate a lifestyle prediction first before using the assistant."
+    })
 
     user_message = request.json.get("message").lower()
 
