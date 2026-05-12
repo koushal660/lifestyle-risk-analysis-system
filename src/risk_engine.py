@@ -1,5 +1,9 @@
 # src/risk_engine.py
 
+
+# -------------------------
+# AGE GROUP
+# -------------------------
 def get_age_group(age):
 
     if age <= 25:
@@ -11,11 +15,8 @@ def get_age_group(age):
     elif age <= 50:
         return "36-50"
 
-    elif age <= 60:
-        return "50-60"
-
     else:
-        return "60+"
+        return "50+"
 
 
 # -------------------------
@@ -49,15 +50,15 @@ def calculate_score(data):
     if data["smoking"] == 1:
         score -= 15
 
-    # Screen time
+    # Screen Time
     if data["screen_time"] > 8:
         score -= 8
 
-    # Water intake
+    # Water Intake
     if data["water_intake"] < 1.5:
         score -= 5
 
-    # Mental health
+    # Mental Health
     if data["mental_health_score"] < 5:
         score -= 10
 
@@ -65,11 +66,11 @@ def calculate_score(data):
     if data["alcohol"] == 1:
         score -= 5
 
-    # Work hours
+    # Work Hours
     if data["work_hours"] > 10:
         score -= 5
 
-    # Fast food
+    # Fast Food
     if data["fast_food_frequency"] >= 4:
         score -= 8
 
@@ -77,104 +78,159 @@ def calculate_score(data):
 
 
 # -------------------------
-# FACTOR DETECTION
+# FACTOR ANALYSIS
 # -------------------------
 def get_factors(data, age_group):
 
     factors = []
 
-    # Smoking
-    if data["smoking"]:
+    # =====================================================
+    # AGE 15-25
+    # =====================================================
+    if age_group == "15-25":
+
+        if (
+            data["stress_level"] > 7 and
+            data["sleep_hours"] < 6
+        ):
+
+            factors.append((
+                "Academic Burnout Risk",
+                "High stress and insufficient sleep may negatively affect concentration, mental wellness, and academic productivity."
+            ))
+
+        if data["screen_time"] > 8:
+
+            factors.append((
+                "Digital Overexposure",
+                "Excessive screen exposure may contribute to sleep disruption, eye strain, and mental fatigue."
+            ))
+
+        if data["mental_health_score"] < 5:
+
+            factors.append((
+                "Mental Wellness Concern",
+                "Emotional stress patterns may be affecting psychological well-being and daily lifestyle balance."
+            ))
+
+    # =====================================================
+    # AGE 26-35
+    # =====================================================
+    elif age_group == "26-35":
+
+        if (
+            data["stress_level"] > 7 and
+            data["work_hours"] > 10
+        ):
+
+            factors.append((
+                "Work-Life Imbalance",
+                "Persistent work pressure and long working hours may increase burnout risk and reduce overall wellness."
+            ))
+
+        if data["exercise_hours"] < 1:
+
+            factors.append((
+                "Sedentary Work Routine",
+                "Low physical activity combined with busy work schedules may affect long-term health and energy levels."
+            ))
+
+        if data["sleep_hours"] < 6:
+
+            factors.append((
+                "Sleep Deprivation",
+                "Poor sleep consistency may reduce recovery, focus, and stress management capacity."
+            ))
+
+    # =====================================================
+    # AGE 36-50
+    # =====================================================
+    elif age_group == "36-50":
+
+        if data["bmi"] >= 25:
+
+            factors.append((
+                "Metabolic Health Risk",
+                "Elevated BMI during mid-adulthood may increase future cardiovascular and metabolic health risks."
+            ))
+
+        if data["diet_quality"] < 5:
+
+            factors.append((
+                "Poor Nutritional Balance",
+                "Unhealthy dietary habits may negatively affect metabolism, energy levels, and long-term wellness."
+            ))
+
+        if data["exercise_hours"] < 1:
+
+            factors.append((
+                "Low Physical Activity",
+                "Insufficient physical activity may contribute to reduced cardiovascular fitness and lifestyle-related risks."
+            ))
+
+        if data["stress_level"] > 7:
+
+            factors.append((
+                "Chronic Stress Exposure",
+                "Persistent stress during mid-adulthood may impact both mental and physical health stability."
+            ))
+
+    # =====================================================
+    # AGE 50+
+    # =====================================================
+    else:
+
+        if data["bmi"] >= 25:
+
+            factors.append((
+                "Cardiovascular Health Concern",
+                "Maintaining healthy body weight becomes increasingly important for heart health and mobility."
+            ))
+
+        if data["exercise_hours"] < 1:
+
+            factors.append((
+                "Mobility & Fitness Decline",
+                "Low activity levels may reduce mobility, flexibility, and long-term physical independence."
+            ))
+
+        if data["water_intake"] < 1.5:
+
+            factors.append((
+                "Hydration Deficiency",
+                "Insufficient hydration may affect recovery, energy levels, and overall body function."
+            ))
+
+        if data["stress_level"] > 7:
+
+            factors.append((
+                "Age-Related Stress Burden",
+                "Chronic stress may negatively influence cardiovascular wellness and overall lifestyle stability."
+            ))
+
+    # =====================================================
+    # COMMON FACTORS
+    # =====================================================
+
+    if data["smoking"] == 1:
+
         factors.append((
             "Smoking",
-            "Reduced lung efficiency"
+            "Smoking may significantly increase long-term respiratory and cardiovascular health risks."
         ))
 
-    # Sleep
-    if data["sleep_hours"] < 6:
-        factors.append((
-            "Low Sleep",
-            "Chronic fatigue"
-        ))
-
-    # Stress
-    if data["stress_level"] > 7:
-
-        if age_group == "15-25":
-
-            factors.append((
-                "High Stress",
-                "Academic pressure"
-            ))
-
-        else:
-
-            factors.append((
-                "High Stress",
-                "Work-related burnout"
-            ))
-
-    # Exercise
-    if data["exercise_hours"] < 1:
-        factors.append((
-            "Sedentary Lifestyle",
-            "Low physical activity"
-        ))
-
-    # Diet
-    if data["diet_quality"] < 5:
-        factors.append((
-            "Poor Diet",
-            "Nutritional imbalance"
-        ))
-
-    # BMI
-    if data["bmi"] >= 25:
-        factors.append((
-            "High BMI",
-            "Health risk"
-        ))
-
-    # Screen Time
-    if data["screen_time"] > 8:
-        factors.append((
-            "Excessive Screen Time",
-            "Mental and physical fatigue"
-        ))
-
-    # Water Intake
-    if data["water_intake"] < 1.5:
-        factors.append((
-            "Low Hydration",
-            "Poor daily water intake"
-        ))
-
-    # Mental Health
-    if data["mental_health_score"] < 5:
-        factors.append((
-            "Poor Mental Health",
-            "Emotional health concerns"
-        ))
-
-    # Alcohol
     if data["alcohol"] == 1:
+
         factors.append((
             "Alcohol Consumption",
-            "Potential long-term health effects"
+            "Frequent alcohol consumption may negatively affect long-term physical and mental wellness."
         ))
 
-    # Work Hours
-    if data["work_hours"] > 10:
-        factors.append((
-            "Long Work Hours",
-            "Poor work-life balance"
-        ))
-
-    # Fast Food
     if data["fast_food_frequency"] >= 4:
+
         factors.append((
-            "Frequent Fast Food",
-            "Unhealthy eating habits"
+            "Frequent Fast Food Intake",
+            "Highly processed food habits may reduce nutritional quality and increase future lifestyle-related risks."
         ))
 
     return factors
@@ -189,64 +245,106 @@ def get_recommendations(factors):
 
     for f, _ in factors:
 
-        if f == "Smoking":
+        if f == "Academic Burnout Risk":
+
             recs.append(
-                "Avoid smoking"
+                "Maintain a healthier balance between study, sleep, and screen usage."
             )
 
-        elif f == "Low Sleep":
+        elif f == "Digital Overexposure":
+
             recs.append(
-                "Sleep at least 7-8 hours daily"
+                "Reduce continuous screen exposure and take regular digital breaks."
             )
 
-        elif f == "High Stress":
+        elif f == "Mental Wellness Concern":
+
             recs.append(
-                "Practice stress management techniques"
+                "Focus on stress reduction, emotional wellness, and healthy daily routines."
             )
 
-        elif f == "Sedentary Lifestyle":
+        elif f == "Work-Life Imbalance":
+
             recs.append(
-                "Exercise regularly (30 mins/day)"
+                "Improve work-life balance and prioritize stress recovery."
             )
 
-        elif f == "Poor Diet":
+        elif f == "Sedentary Work Routine":
+
             recs.append(
-                "Improve diet and reduce junk food"
+                "Increase daily physical activity and avoid prolonged sitting."
             )
 
-        elif f == "High BMI":
+        elif f == "Sleep Deprivation":
+
             recs.append(
-                "Maintain healthy weight"
+                "Maintain consistent sleep schedules and improve sleep quality."
             )
 
-        elif f == "Excessive Screen Time":
+        elif f == "Metabolic Health Risk":
+
             recs.append(
-                "Reduce screen exposure and take breaks"
+                "Focus on weight management, balanced nutrition, and regular exercise."
             )
 
-        elif f == "Low Hydration":
+        elif f == "Poor Nutritional Balance":
+
             recs.append(
-                "Drink more water daily"
+                "Improve nutritional intake and reduce unhealthy food habits."
             )
 
-        elif f == "Poor Mental Health":
+        elif f == "Low Physical Activity":
+
             recs.append(
-                "Focus on mental wellness and relaxation"
+                "Increase cardiovascular and fitness-focused activities."
+            )
+
+        elif f == "Chronic Stress Exposure":
+
+            recs.append(
+                "Practice long-term stress management and lifestyle balance."
+            )
+
+        elif f == "Cardiovascular Health Concern":
+
+            recs.append(
+                "Maintain healthy BMI and prioritize heart-friendly lifestyle habits."
+            )
+
+        elif f == "Mobility & Fitness Decline":
+
+            recs.append(
+                "Engage in mobility exercises, walking, and regular movement."
+            )
+
+        elif f == "Hydration Deficiency":
+
+            recs.append(
+                "Increase daily water intake and maintain proper hydration."
+            )
+
+        elif f == "Age-Related Stress Burden":
+
+            recs.append(
+                "Maintain relaxation routines and reduce chronic stress exposure."
+            )
+
+        elif f == "Smoking":
+
+            recs.append(
+                "Avoid smoking to improve long-term respiratory and heart health."
             )
 
         elif f == "Alcohol Consumption":
+
             recs.append(
-                "Reduce alcohol consumption"
+                "Reduce alcohol consumption and maintain healthier lifestyle habits."
             )
 
-        elif f == "Long Work Hours":
-            recs.append(
-                "Maintain better work-life balance"
-            )
+        elif f == "Frequent Fast Food Intake":
 
-        elif f == "Frequent Fast Food":
             recs.append(
-                "Reduce fast food intake"
+                "Reduce processed food intake and improve meal quality."
             )
 
     return recs
@@ -260,22 +358,22 @@ def get_future_insight(score):
     if score < 40:
 
         return (
-            "Very high future health risk detected. "
-            "Immediate lifestyle improvements are strongly recommended."
+            "Current lifestyle patterns indicate elevated long-term health risk. "
+            "Early lifestyle improvements can significantly improve future wellness outcomes."
         )
 
     elif score < 70:
 
         return (
-            "Moderate future health risk detected. "
-            "Improving daily habits can significantly improve long-term wellness."
+            "Moderate lifestyle risk detected. "
+            "Improving daily habits and maintaining healthier routines may reduce future health complications."
         )
 
     else:
 
         return (
-            "Current lifestyle appears relatively healthy. "
-            "Maintaining these habits can support long-term health."
+            "Current lifestyle appears relatively stable and health-conscious. "
+            "Maintaining consistency in healthy habits may support long-term wellness."
         )
 
 
