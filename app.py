@@ -26,6 +26,96 @@ model = joblib.load("models/model.pkl")
 
 
 # -------------------------
+# CHATBOT INTENTS
+# -------------------------
+INTENTS = {
+
+    "risk": [
+        "risk",
+        "danger",
+        "future risk",
+        "health risk"
+    ],
+
+    "sleep": [
+        "sleep",
+        "insomnia",
+        "fatigue",
+        "tired",
+        "sleeping"
+    ],
+
+    "stress": [
+        "stress",
+        "burnout",
+        "pressure",
+        "anxiety",
+        "tension"
+    ],
+
+    "exercise": [
+        "exercise",
+        "workout",
+        "fitness",
+        "gym",
+        "physical activity"
+    ],
+
+    "diet": [
+        "diet",
+        "food",
+        "nutrition",
+        "eating",
+        "junk food"
+    ],
+
+    "smoking": [
+        "smoking",
+        "cigarette",
+        "tobacco"
+    ],
+
+    "bmi": [
+        "bmi",
+        "weight",
+        "obesity",
+        "fat"
+    ],
+
+    "recommendation": [
+        "recommendation",
+        "improve",
+        "suggestion",
+        "advice",
+        "help"
+    ],
+
+    "greeting": [
+        "hello",
+        "hi",
+        "hey"
+    ]
+}
+
+
+# -------------------------
+# DETECT INTENT
+# -------------------------
+def detect_intent(message):
+
+    message = message.lower()
+
+    for intent, keywords in INTENTS.items():
+
+        for word in keywords:
+
+            if word in message:
+                return intent
+
+    return "unknown"
+
+
+# -------------------------
 # 1. HOME PAGE
 # -------------------------
 @app.route("/")
@@ -134,6 +224,7 @@ def predict():
 
     try:
         predictions_collection.insert_one(prediction_data)
+
     except Exception as e:
         print("MongoDB Error:", e)
 
@@ -145,7 +236,8 @@ def predict():
         "score": score,
         "factors": factors_dict,
         "recommendations": recommendations,
-        "future": future
+        "future": future,
+        "age_group": age_group
     }
 
     return render_template(
@@ -268,19 +360,21 @@ def history():
 # -------------------------
 @app.route("/chat", methods=["POST"])
 def chat():
+
     global latest_result
 
     if "latest_result" not in globals():
 
-      return jsonify({
-        "reply":
-        "Please generate a lifestyle prediction first before using the assistant."
-    })
+        return jsonify({
+            "reply":
+            "Please generate a lifestyle prediction first before using the assistant."
+        })
 
-    user_message = request.json.get("message").lower()
+    user_message = request.json.get("message")
+
+    intent = detect_intent(user_message)
 
     risk = latest_result["risk"]
-    score = latest_result["score"]
 
     factors = [
         factor["name"]
@@ -289,156 +383,177 @@ def chat():
 
     recommendations = latest_result["recommendations"]
 
+    age_group = latest_result["age_group"]
+
     reply = ""
 
-    # RISK ANALYSIS
-    if "risk" in user_message:
+    # -------------------------
+    # RISK
+    # -------------------------
+    if intent == "risk":
 
         if risk == "High":
 
             reply = (
-                f"Your risk level is HIGH mainly because of "
+                f"Your current lifestyle risk is HIGH mainly because of "
                 f"{', '.join(factors)}. "
-                f"Improving sleep, stress management, diet, "
-                f"and physical activity can significantly "
-                f"reduce future health risks."
             )
 
-        elif risk == "Medium":
+            if age_group == "15-25":
 
-            reply = (
-                f"Your lifestyle risk is MODERATE. "
-                f"You are doing well in some areas, but "
-                f"{', '.join(factors)} need improvement "
-                f"to prevent future health issues."
-            )
+                reply += (
+                    "Your age group is especially vulnerable to academic burnout, "
+                    "mental fatigue, and unhealthy digital habits."
+                )
+
+            elif age_group == "26-35":
+
+                reply += (
+                    "Work pressure, long routines, and lifestyle imbalance "
+                    "may significantly affect long-term wellness."
+                )
+
+            elif age_group == "36-50":
+
+                reply += (
+                    "At this stage, lifestyle habits can strongly influence "
+                    "metabolic and cardiovascular health."
+                )
+
+            else:
+
+                reply += (
+                    "Maintaining mobility, cardiovascular wellness, and "
+                    "healthy daily habits becomes increasingly important."
+                )
 
         else:
 
             reply = (
-                "Your current lifestyle risk is LOW. "
-                "Maintaining healthy habits consistently "
-                "can help you stay healthy long-term."
+                "Your current lifestyle risk appears manageable, "
+                "but maintaining healthy habits consistently is important."
             )
 
+    # -------------------------
     # SLEEP
-    elif "sleep" in user_message:
+    # -------------------------
+    elif intent == "sleep":
 
         reply = (
             "To improve sleep quality:\n"
-            "- Sleep 7-8 hours daily\n"
-            "- Reduce screen time before bed\n"
-            "- Maintain a fixed sleep schedule\n"
+            "- Maintain 7-8 hours sleep\n"
+            "- Reduce screen exposure before bed\n"
+            "- Maintain consistent sleep schedule\n"
             "- Avoid caffeine late at night"
         )
 
+    # -------------------------
     # STRESS
-    elif "stress" in user_message:
+    # -------------------------
+    elif intent == "stress":
 
         reply = (
-            "To reduce stress:\n"
-            "- Practice meditation or deep breathing\n"
-            "- Exercise regularly\n"
-            "- Take proper breaks during work\n"
-            "- Maintain healthy sleep habits"
+            "Stress management suggestions:\n"
+            "- Practice meditation or breathing exercises\n"
+            "- Take proper work/study breaks\n"
+            "- Maintain healthy sleep routine\n"
+            "- Exercise regularly"
         )
 
+    # -------------------------
     # EXERCISE
-    elif (
-        "exercise" in user_message or
-        "workout" in user_message or
-        "fitness" in user_message
-    ):
+    # -------------------------
+    elif intent == "exercise":
 
         reply = (
             "Recommended activities:\n"
-            "- Walking or jogging\n"
+            "- Walking\n"
+            "- Jogging\n"
             "- Cycling\n"
             "- Home workouts\n"
-            "- Yoga or stretching\n\n"
+            "- Stretching or yoga\n\n"
             "Aim for at least 30 minutes daily."
         )
 
+    # -------------------------
     # DIET
-    elif (
-        "diet" in user_message or
-        "food" in user_message or
-        "nutrition" in user_message
-    ):
+    # -------------------------
+    elif intent == "diet":
 
         reply = (
-            "To improve diet quality:\n"
-            "- Reduce junk food intake\n"
-            "- Eat more fruits and vegetables\n"
-            "- Drink enough water\n"
-            "- Increase protein and fiber intake"
+            "Diet improvement tips:\n"
+            "- Reduce processed food intake\n"
+            "- Increase fruits and vegetables\n"
+            "- Drink sufficient water\n"
+            "- Maintain balanced nutrition"
         )
 
+    # -------------------------
     # SMOKING
-    elif "smoking" in user_message:
+    # -------------------------
+    elif intent == "smoking":
 
         reply = (
-            "Smoking can significantly increase future "
-            "health risks. Reducing or quitting smoking "
-            "can improve lung health, heart health, and "
-            "overall lifestyle score."
+            "Reducing smoking can significantly improve "
+            "respiratory health, cardiovascular wellness, "
+            "and long-term lifestyle quality."
         )
 
-    # BMI / WEIGHT
-    elif (
-        "bmi" in user_message or
-        "weight" in user_message
-    ):
+    # -------------------------
+    # BMI
+    # -------------------------
+    elif intent == "bmi":
 
         reply = (
-            "Maintaining a healthy BMI requires:\n"
+            "Maintaining healthy BMI requires:\n"
             "- Balanced diet\n"
-            "- Regular exercise\n"
+            "- Regular physical activity\n"
             "- Good sleep\n"
             "- Consistent healthy habits"
         )
 
+    # -------------------------
     # RECOMMENDATIONS
-    elif (
-        "recommendation" in user_message or
-        "improve" in user_message or
-        "suggestion" in user_message
-    ):
+    # -------------------------
+    elif intent == "recommendation":
 
         reply = (
-            "Based on your lifestyle analysis, "
-            "these improvements are recommended:\n\n"
+            "Based on your lifestyle analysis:\n\n"
             + "\n".join(
                 [f"- {r}" for r in recommendations]
             )
         )
 
-    # GREETINGS
-    elif (
-        "hello" in user_message or
-        "hi" in user_message or
-        "hey" in user_message
-    ):
+    # -------------------------
+    # GREETING
+    # -------------------------
+    elif intent == "greeting":
 
         reply = (
-            "Hello 👋 I'm your Lifestyle Health Assistant. "
-            "You can ask me about sleep, stress, diet, "
-            "exercise, BMI, or your risk analysis."
+            "Hello 👋 I'm your AI Lifestyle Health Assistant.\n\n"
+            "I can help you understand:\n"
+            "- lifestyle risks\n"
+            "- sleep & stress patterns\n"
+            "- fitness & diet habits\n"
+            "- age-based health insights\n"
+            "- wellness improvements"
         )
 
-    # DEFAULT RESPONSE
+    # -------------------------
+    # UNKNOWN
+    # -------------------------
     else:
 
         reply = (
-            "I can help you understand your lifestyle "
-            "analysis and health improvements.\n\n"
+            "I can help you understand your lifestyle analysis.\n\n"
             "Try asking about:\n"
+            "- risk\n"
             "- sleep\n"
             "- stress\n"
             "- exercise\n"
             "- diet\n"
             "- BMI\n"
-            "- risk level"
+            "- recommendations"
         )
 
     return jsonify({
