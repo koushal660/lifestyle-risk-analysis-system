@@ -88,6 +88,7 @@ INTENTS = {
         "suggestion",
         "advice",
         "help"
+        "reduce"
     ],
 
     "greeting": [
