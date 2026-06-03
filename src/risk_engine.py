@@ -382,14 +382,49 @@ def get_future_insight(score):
 # -------------------------
 def get_distribution(factors):
 
-    total = len(factors)
+    severity_map = {
+
+        "Smoking": 35,
+        "Alcohol Consumption": 20,
+        "Frequent Fast Food Intake": 15,
+
+        "Sedentary Work Routine": 20,
+        "Sleep Deprivation": 15,
+        "Work-Life Imbalance": 20,
+
+        "Metabolic Health Risk": 20,
+        "Poor Nutritional Balance": 15,
+        "Low Physical Activity": 20,
+
+        "Chronic Stress Exposure": 20,
+        "Academic Burnout Risk": 20,
+        "Mental Wellness Concern": 15,
+
+        "Cardiovascular Health Concern": 25,
+        "Mobility & Fitness Decline": 15,
+        "Hydration Deficiency": 10,
+
+        "Age-Related Stress Burden": 15,
+        "Digital Overexposure": 10
+    }
+
+    raw_scores = {}
+
+    # Assign severity weights
+    for f, _ in factors:
+
+        raw_scores[f] = severity_map.get(f, 10)
+
+    total = sum(raw_scores.values())
 
     if total == 0:
         return {}
 
-    percent = int(100 / total)
+    # Convert into percentages
+    distribution = {}
 
-    return {
-        f: percent
-        for f, _ in factors
-    }
+    for factor, value in raw_scores.items():
+
+        distribution[factor] = round((value / total) * 100)
+
+    return distribution
