@@ -285,7 +285,45 @@ def download_report():
 
     p = canvas.Canvas(buffer)
 
-    p.setFont("Helvetica-Bold", 18)
+    width = 550
+
+    # -------------------------
+    # HELPER FUNCTION
+    # -------------------------
+    def draw_wrapped_text(text, x, y, line_height=18):
+
+        words = text.split()
+
+        line = ""
+
+        for word in words:
+
+            test_line = line + word + " "
+
+            if p.stringWidth(test_line, "Helvetica", 12) < width:
+
+                line = test_line
+
+            else:
+
+                p.drawString(x, y, line)
+
+                y -= line_height
+
+                line = word + " "
+
+        if line:
+
+            p.drawString(x, y, line)
+
+            y -= line_height
+
+        return y
+
+    # -------------------------
+    # TITLE
+    # -------------------------
+    p.setFont("Helvetica-Bold", 20)
 
     p.drawString(
         170,
@@ -297,6 +335,9 @@ def download_report():
 
     y = 760
 
+    # -------------------------
+    # BASIC DETAILS
+    # -------------------------
     p.drawString(
         50,
         y,
@@ -313,44 +354,83 @@ def download_report():
 
     y -= 40
 
+    # -------------------------
+    # FACTORS
+    # -------------------------
+    p.setFont("Helvetica-Bold", 14)
+
     p.drawString(50, y, "Key Risk Factors:")
 
-    y -= 25
+    y -= 30
+
+    p.setFont("Helvetica", 12)
 
     for factor in latest_result["factors"]:
 
-        p.drawString(
-            70,
-            y,
-            f"- {factor['name']} : {factor['impact']}"
+        text = (
+            f"- {factor['name']} : "
+            f"{factor['impact']}"
         )
 
-        y -= 20
-
-    y -= 20
-
-    p.drawString(50, y, "Recommendations:")
-
-    y -= 25
-
-    for rec in latest_result["recommendations"]:
-
-        p.drawString(
+        y = draw_wrapped_text(
+            text,
             70,
-            y,
-            f"- {rec}"
+            y
         )
 
-        y -= 20
+        y -= 10
 
-    y -= 30
+    # -------------------------
+    # RECOMMENDATIONS
+    # -------------------------
+    p.setFont("Helvetica-Bold", 14)
 
     p.drawString(
         50,
         y,
-        f"Future Insight: {latest_result['future']}"
+        "Recommendations:"
     )
 
+    y -= 30
+
+    p.setFont("Helvetica", 12)
+
+    for rec in latest_result["recommendations"]:
+
+        text = f"- {rec}"
+
+        y = draw_wrapped_text(
+            text,
+            70,
+            y
+        )
+
+        y -= 10
+
+    # -------------------------
+    # FUTURE INSIGHT
+    # -------------------------
+    p.setFont("Helvetica-Bold", 14)
+
+    p.drawString(
+        50,
+        y,
+        "Future Insight:"
+    )
+
+    y -= 30
+
+    p.setFont("Helvetica", 12)
+
+    y = draw_wrapped_text(
+        latest_result["future"],
+        70,
+        y
+    )
+
+    # -------------------------
+    # SAVE PDF
+    # -------------------------
     p.save()
 
     buffer.seek(0)
